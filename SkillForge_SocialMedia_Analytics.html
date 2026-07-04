@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SkillForge — Social Media Analytics & Reporting | DecodeLabs Project 4</title>
+<style>
+:root{
+  --blue:#1A73E8;--dark:#0D1B2E;--purple:#7C3AED;--green:#34A853;
+  --orange:#E8500A;--light-bg:#EAF2FB;--accent-bg:#F3E8FF;
+  --text:#222;--grey:#666;--border:#e0e8f5;--surface:#f4f7fb;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--surface);color:var(--text);}
+
+nav{background:var(--dark);color:white;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+nav .logo{font-size:1.3rem;font-weight:800;letter-spacing:1px;}
+nav .logo span{color:#7C3AED;}
+nav .badge{background:var(--purple);color:white;font-size:0.75rem;padding:5px 14px;border-radius:20px;font-weight:600;}
+nav .intern{font-size:0.8rem;color:rgba(255,255,255,0.6);}
+
+.hero{background:linear-gradient(135deg,#0D1B2E 0%,#2d1b69 50%,#1a3a6e 100%);color:white;padding:52px 40px 60px;text-align:center;}
+.hero .tag{font-size:0.78rem;font-weight:700;color:#a78bfa;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.hero h1{font-size:clamp(1.8rem,4vw,3.2rem);font-weight:900;}
+.hero h1 span{color:#a78bfa;}
+.hero .sub{font-size:1.1rem;color:rgba(255,255,255,0.7);margin:12px 0 6px;}
+.hero .meta{font-size:0.85rem;color:rgba(255,255,255,0.5);}
+.hero-chips{display:flex;gap:10px;justify-content:center;margin-top:24px;flex-wrap:wrap;}
+.hero-chips span{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.85);padding:6px 18px;border-radius:20px;font-size:0.82rem;}
+.hero-chips span.p{background:rgba(124,58,237,0.25);border-color:rgba(124,58,237,0.5);}
+
+.tabs-wrapper{background:white;border-bottom:2px solid var(--border);position:sticky;top:53px;z-index:90;box-shadow:0 2px 6px rgba(0,0,0,0.04);}
+.tabs{display:flex;overflow-x:auto;max-width:1000px;margin:0 auto;padding:0 20px;}
+.tabs::-webkit-scrollbar{height:0;}
+.tab{padding:14px 18px;cursor:pointer;font-size:0.84rem;font-weight:600;color:var(--grey);border-bottom:3px solid transparent;white-space:nowrap;transition:all 0.2s;}
+.tab:hover{color:var(--purple);background:#f5f0ff;}
+.tab.active{color:var(--purple);border-bottom-color:var(--purple);}
+
+.content{max-width:1000px;margin:0 auto;padding:32px 20px 80px;}
+.section{display:none;animation:fadeIn 0.25s;}
+.section.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+h2{font-size:1.5rem;color:var(--dark);margin-bottom:4px;margin-top:28px;font-weight:700;}
+h2:first-child{margin-top:0;}
+h3{font-size:1.05rem;color:var(--purple);margin:18px 0 8px;font-weight:700;}
+p{line-height:1.7;color:var(--text);margin-bottom:10px;font-size:0.93rem;}
+ul{padding-left:20px;}
+ul li{margin-bottom:6px;line-height:1.65;font-size:0.92rem;}
+b,strong{color:var(--dark);}
+
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:20px 0;}
+.metric{background:white;border-radius:12px;padding:18px 16px;border:1px solid var(--border);text-align:center;}
+.metric .val{font-size:1.9rem;font-weight:800;color:var(--purple);}
+.metric .val.g{color:var(--green);}
+.metric .val.b{color:var(--blue);}
+.metric .val.o{color:var(--orange);}
+.metric .lbl{font-size:0.75rem;color:var(--grey);margin-top:4px;line-height:1.4;}
+
+.card{background:white;border-radius:14px;padding:22px;margin-bottom:18px;border:1px solid var(--border);}
+.card.pu{border-left:4px solid var(--purple);}
+.card.bl{border-left:4px solid var(--blue);}
+.card.gr{border-left:4px solid var(--green);}
+.card.or{border-left:4px solid var(--orange);}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+@media(max-width:600px){.card-grid{grid-template-columns:1fr}}
+
+.band{background:var(--light-bg);border-left:4px solid var(--blue);border-radius:0 8px 8px 0;padding:13px 16px;margin:12px 0;font-style:italic;color:#1a3c6e;line-height:1.65;font-size:0.9rem;}
+.band.pu{background:var(--accent-bg);border-left-color:var(--purple);color:#4c1d95;}
+.band.gr{background:#E8F5E9;border-left-color:var(--green);color:#155724;}
+.band.or{background:#FEF0E6;border-left-color:var(--orange);color:#7a2800;}
+
+/* FUNNEL */
+.funnel-v{display:flex;flex-direction:column;gap:6px;margin:16px 0;}
+.funnel-step{padding:14px 20px;border-radius:8px;color:white;font-weight:700;font-size:0.9rem;text-align:center;}
+.f1{background:#7C3AED;}
+.f2{background:#6d28d9;margin:0 30px;}
+.f3{background:#5b21b6;margin:0 60px;}
+.f4{background:#4c1d95;margin:0 90px;}
+.funnel-arrow{text-align:center;color:var(--purple);font-size:1rem;margin:1px 0;}
+
+/* METRICS DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:16px 0;}
+.dash-card{background:white;border-radius:12px;padding:18px;border:1px solid var(--border);}
+.dash-card .platform{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+.dash-card.li .platform{color:#0a66c2;}
+.dash-card.ig .platform{color:#E91E8C;}
+.dash-card.fb .platform{color:#1877F2;}
+.dash-card .kpi{font-size:1.6rem;font-weight:800;color:var(--dark);margin-bottom:4px;}
+.dash-card .kpi-label{font-size:0.78rem;color:var(--grey);}
+.dash-card .trend{font-size:0.8rem;font-weight:600;margin-top:6px;}
+.trend.up{color:var(--green);}
+.trend.dn{color:#dc2626;}
+
+/* REPORT */
+.report-mock{background:white;border-radius:14px;padding:24px;border:1px solid var(--border);}
+.report-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.report-header h3{color:var(--dark);font-size:1.1rem;margin:0;}
+.report-header .period{font-size:0.8rem;color:var(--grey);background:#f0f4ff;padding:4px 12px;border-radius:12px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:16px 0;}
+.kpi-box{background:#f8faff;border-radius:10px;padding:14px;text-align:center;}
+.kpi-box .kv{font-size:1.4rem;font-weight:800;color:var(--purple);}
+.kpi-box .kn{font-size:0.75rem;color:var(--grey);margin-top:3px;}
+.kpi-box .kt{font-size:0.78rem;font-weight:600;}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:0.86rem;margin:16px 0;}
+.tbl thead tr{background:var(--dark);color:white;}
+.tbl thead th{padding:11px 14px;text-align:left;font-weight:600;}
+.tbl tbody tr:nth-child(even){background:#f8faff;}
+.tbl tbody tr:hover{background:#f0e8ff;}
+.tbl tbody td{padding:9px 14px;border-bottom:1px solid var(--border);}
+
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.76rem;font-weight:600;}
+.tag.reach{background:#dbeeff;color:#0d47a1;}
+.tag.engage{background:#f3e8ff;color:#4c1d95;}
+.tag.conv{background:#dcfce7;color:#14532d;}
+.tag.vanity{background:#fee2e2;color:#7f1d1d;}
+
+/* BAR CHART */
+.bar-chart{margin:16px 0;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:0.85rem;}
+.bar-label{width:100px;color:var(--grey);text-align:right;flex-shrink:0;}
+.bar-track{flex:1;background:#f0f4ff;border-radius:4px;height:28px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:10px;font-size:0.78rem;font-weight:700;color:white;transition:width 0.3s;}
+.bar-val{width:60px;font-weight:700;color:var(--dark);}
+
+footer{background:var(--dark);color:rgba(255,255,255,0.6);text-align:center;padding:28px;font-size:0.85rem;}
+footer strong{color:white;}
+footer .footer-links{display:flex;gap:20px;justify-content:center;margin-top:10px;flex-wrap:wrap;font-size:0.78rem;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">SKILL<span>FORGE</span></div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="intern">Vansh Singhal</span>
+    <span class="badge">✓ Project 4 Complete</span>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="tag">Project 4 · DecodeLabs Batch 2026</div>
+  <h1>Social Media <span>Analytics & Reporting</span></h1>
+  <div class="sub">From Vanity Metrics to Business Intelligence — Data-Driven Decision Making</div>
+  <div class="meta">Vansh Singhal · BBA · DDUMC College · DecodeLabs Industrial Training</div>
+  <div class="hero-chips">
+    <span>📊 Analytics Dashboard</span>
+    <span>📈 KPI Tracking</span>
+    <span class="p">🎯 Performance Report</span>
+    <span class="p">💡 Data-Driven Insights</span>
+  </div>
+</div>
+
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('overview',this)">1. Overview</div>
+    <div class="tab" onclick="showTab('metrics',this)">2. Key Metrics</div>
+    <div class="tab" onclick="showTab('platforms',this)">3. Platform Analysis</div>
+    <div class="tab" onclick="showTab('funnel',this)">4. Analytics Funnel</div>
+    <div class="tab" onclick="showTab('report',this)">5. Monthly Report</div>
+    <div class="tab" onclick="showTab('insights',this)">6. Insights</div>
+    <div class="tab" onclick="showTab('strategy',this)">7. Strategy</div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- TAB 1: OVERVIEW -->
+  <div id="tab-overview" class="section active">
+    <h2>Project Overview</h2>
+    <div class="band pu">Project 4 is the analytics phase: Social Media Analytics & Reporting. This track isn't about collecting numbers — it's about extracting actionable intelligence. You must master the art of reading data, identifying patterns, and translating metrics into strategic decisions that drive real business growth.</div>
+
+    <div class="metrics">
+      <div class="metric"><div class="val">3</div><div class="lbl">Platforms analysed (LinkedIn, Instagram, Facebook)</div></div>
+      <div class="metric"><div class="val p" style="color:var(--purple);">KPIs</div><div class="lbl">Reach, Engagement, Conversion tracked</div></div>
+      <div class="metric"><div class="val g">30</div><div class="lbl">Days of data in monthly performance report</div></div>
+      <div class="metric"><div class="val b">ROI</div><div class="lbl">Return on content investment measured</div></div>
+      <div class="metric"><div class="val o">CTR</div><div class="lbl">Click-through rate optimised per platform</div></div>
+      <div class="metric"><div class="val g">↑</div><div class="lbl">Data-driven strategy recommendations</div></div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card pu">
+        <h3>What This Project Proves</h3>
+        <ul style="margin-top:8px;">
+          <li>✅ Track social media performance data</li>
+          <li>✅ Identify what content works and why</li>
+          <li>✅ Create a professional analytics report</li>
+          <li>✅ Make data-driven content decisions</li>
+          <li>✅ Measure ROI beyond vanity metrics</li>
+          <li>✅ Suggest strategy improvements from data</li>
+        </ul>
+      </div>
+      <div class="card gr">
+        <h3>Key Skills Demonstrated</h3>
+        <ul style="margin-top:8px;">
+          <li>📊 Social media analytics</li>
+          <li>📈 KPI identification & tracking</li>
+          <li>🔍 Pattern recognition in data</li>
+          <li>📋 Report writing & visualisation</li>
+          <li>🎯 Audience behaviour analysis</li>
+          <li>💡 Strategic recommendation writing</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Vanity Metrics vs. Business Metrics</h3>
+    <div class="card-grid">
+      <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:12px;padding:18px;">
+        <h4 style="color:#7f1d1d;margin-bottom:10px;">❌ Vanity Metrics (Stop Tracking)</h4>
+        <ul style="padding-left:16px;">
+          <li style="font-size:0.88rem;color:#991b1b;margin-bottom:5px;">Total Followers (doesn't = revenue)</li>
+          <li style="font-size:0.88rem;color:#991b1b;margin-bottom:5px;">Total Likes (feels good, means little)</li>
+          <li style="font-size:0.88rem;color:#991b1b;margin-bottom:5px;">Total Impressions (no context)</li>
+          <li style="font-size:0.88rem;color:#991b1b;">Post Count (quantity ≠ quality)</li>
+        </ul>
+      </div>
+      <div style="background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:18px;">
+        <h4 style="color:#14532d;margin-bottom:10px;">✅ Business Metrics (Track These)</h4>
+        <ul style="padding-left:16px;">
+          <li style="font-size:0.88rem;color:#166534;margin-bottom:5px;">Engagement Rate (% of audience engaging)</li>
+          <li style="font-size:0.88rem;color:#166534;margin-bottom:5px;">Click-Through Rate (traffic intent)</li>
+          <li style="font-size:0.88rem;color:#166534;margin-bottom:5px;">Conversion Rate (leads generated)</li>
+          <li style="font-size:0.88rem;color:#166534;">Cost Per Lead (budget efficiency)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: KEY METRICS -->
+  <div id="tab-metrics" class="section">
+    <h2>Key Performance Indicators (KPIs)</h2>
+    <div class="band pu">Every metric must answer one question: Does this data help us make a better decision? If not, it is a vanity metric. Track only what you can act on.</div>
+
+    <h3>The 4 Metric Categories</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:16px 0;">
+      <div class="card pu" style="text-align:center;">
+        <div style="font-size:1.8rem;margin-bottom:8px;">📡</div>
+        <h4 style="color:var(--dark);margin-bottom:6px;">Reach Metrics</h4>
+        <p style="font-size:0.83rem;">How many people saw your content. Impressions, Reach, Follower Growth Rate.</p>
+      </div>
+      <div class="card bl" style="text-align:center;">
+        <div style="font-size:1.8rem;margin-bottom:8px;">💬</div>
+        <h4 style="color:var(--dark);margin-bottom:6px;">Engagement Metrics</h4>
+        <p style="font-size:0.83rem;">How people interacted. Likes, Comments, Shares, Saves, Engagement Rate %.</p>
+      </div>
+      <div class="card gr" style="text-align:center;">
+        <div style="font-size:1.8rem;margin-bottom:8px;">🔗</div>
+        <h4 style="color:var(--dark);margin-bottom:6px;">Traffic Metrics</h4>
+        <p style="font-size:0.83rem;">Click-Through Rate, Link Clicks, Website Sessions from Social.</p>
+      </div>
+      <div class="card or" style="text-align:center;">
+        <div style="font-size:1.8rem;margin-bottom:8px;">💰</div>
+        <h4 style="color:var(--dark);margin-bottom:6px;">Conversion Metrics</h4>
+        <p style="font-size:0.83rem;">Leads Generated, Enrolments, Cost Per Lead, ROI on Content.</p>
+      </div>
+    </div>
+
+    <h3>KPI Benchmarks for SkillForge</h3>
+    <table class="tbl">
+      <thead><tr><th>KPI</th><th>Category</th><th>Target</th><th>Current</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Engagement Rate</td><td><span class="tag engage">Engagement</span></td><td>3-5%</td><td>4.2%</td><td>✅ On Track</td></tr>
+        <tr><td>Click-Through Rate</td><td><span class="tag conv">Conversion</span></td><td>2%+</td><td>2.8%</td><td>✅ On Track</td></tr>
+        <tr><td>Follower Growth Rate</td><td><span class="tag reach">Reach</span></td><td>10% MoM</td><td>14.3%</td><td>✅ Exceeding</td></tr>
+        <tr><td>Profile Visits (LinkedIn)</td><td><span class="tag reach">Reach</span></td><td>1,500+/mo</td><td>1,689</td><td>✅ On Track</td></tr>
+        <tr><td>DM Enquiries (Instagram)</td><td><span class="tag conv">Conversion</span></td><td>50+/mo</td><td>73</td><td>✅ Exceeding</td></tr>
+        <tr><td>Saves per Reel</td><td><span class="tag engage">Engagement</span></td><td>200+</td><td>247</td><td>✅ Exceeding</td></tr>
+        <tr><td>Story Views</td><td><span class="tag reach">Reach</span></td><td>500+/story</td><td>612</td><td>✅ On Track</td></tr>
+        <tr><td>Total Likes</td><td><span class="tag vanity">Vanity</span></td><td>—</td><td>3,240</td><td>⚠️ Vanity</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB 3: PLATFORM ANALYSIS -->
+  <div id="tab-platforms" class="section">
+    <h2>Platform-by-Platform Analysis</h2>
+    <div class="band">Each platform has a different algorithm, audience behaviour, and success metric. One-size-fits-all analytics is a trap. Analyse each platform on its own terms.</div>
+
+    <div class="dash-grid">
+      <div class="dash-card li">
+        <div class="platform">🔵 LinkedIn Analytics</div>
+        <div class="kpi">1,689</div>
+        <div class="kpi-label">Profile views from TPOs/HRs this month</div>
+        <div class="trend up">↑ +23% vs last month</div>
+      </div>
+      <div class="dash-card ig">
+        <div class="platform">🩷 Instagram Analytics</div>
+        <div class="kpi">4.2%</div>
+        <div class="kpi-label">Average engagement rate (industry avg: 1.5%)</div>
+        <div class="trend up">↑ +0.8% vs last month</div>
+      </div>
+      <div class="dash-card fb">
+        <div class="platform">🔵 Facebook Analytics</div>
+        <div class="kpi">612</div>
+        <div class="kpi-label">Average story views per post</div>
+        <div class="trend up">↑ +12% vs last month</div>
+      </div>
+    </div>
+
+    <h3>LinkedIn Deep Dive</h3>
+    <div class="bar-chart">
+      <div class="bar-row"><span class="bar-label">Impressions</span><div class="bar-track"><div class="bar-fill" style="width:90%;background:#0a66c2;">45,230</div></div><span class="bar-val">45.2K</span></div>
+      <div class="bar-row"><span class="bar-label">Profile Views</span><div class="bar-track"><div class="bar-fill" style="width:65%;background:#0a66c2;">1,689</div></div><span class="bar-val">1,689</span></div>
+      <div class="bar-row"><span class="bar-label">Connections</span><div class="bar-track"><div class="bar-fill" style="width:45%;background:#0a66c2;">+124</div></div><span class="bar-val">+124</span></div>
+      <div class="bar-row"><span class="bar-label">Post Clicks</span><div class="bar-track"><div class="bar-fill" style="width:55%;background:#0a66c2;">892</div></div><span class="bar-val">892</span></div>
+    </div>
+
+    <h3>Instagram Deep Dive</h3>
+    <div class="bar-chart">
+      <div class="bar-row"><span class="bar-label">Reach</span><div class="bar-track"><div class="bar-fill" style="width:85%;background:#E91E8C;">28,400</div></div><span class="bar-val">28.4K</span></div>
+      <div class="bar-row"><span class="bar-label">Saves</span><div class="bar-track"><div class="bar-fill" style="width:70%;background:#E91E8C;">1,240</div></div><span class="bar-val">1,240</span></div>
+      <div class="bar-row"><span class="bar-label">DM Enquiries</span><div class="bar-track"><div class="bar-fill" style="width:50%;background:#E91E8C;">73</div></div><span class="bar-val">73</span></div>
+      <div class="bar-row"><span class="bar-label">Reel Views</span><div class="bar-track"><div class="bar-fill" style="width:95%;background:#E91E8C;">52,100</div></div><span class="bar-val">52.1K</span></div>
+    </div>
+
+    <h3>Best Performing Content Types</h3>
+    <table class="tbl">
+      <thead><tr><th>Platform</th><th>Content Type</th><th>Avg Engagement</th><th>Best Post Time</th><th>Recommendation</th></tr></thead>
+      <tbody>
+        <tr><td>LinkedIn</td><td>Carousel Posts</td><td>5.8%</td><td>Tue/Wed 8-9am</td><td>✅ Increase frequency</td></tr>
+        <tr><td>LinkedIn</td><td>Text Posts</td><td>4.1%</td><td>Mon 7-8am</td><td>📈 Good performance</td></tr>
+        <tr><td>Instagram</td><td>Reels (BTS)</td><td>6.2%</td><td>Tue/Thu 6-8pm</td><td>✅ Top performer</td></tr>
+        <tr><td>Instagram</td><td>Carousels</td><td>4.8%</td><td>Wed 12-2pm</td><td>📈 Consistent</td></tr>
+        <tr><td>Instagram</td><td>Static Posts</td><td>2.1%</td><td>Varies</td><td>⬇️ Reduce frequency</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB 4: ANALYTICS FUNNEL -->
+  <div id="tab-funnel" class="section">
+    <h2>The Social Media Analytics Funnel</h2>
+    <div class="band pu">Analytics must map to the buyer journey. Every metric sits at a specific funnel stage. Knowing WHERE a metric lives tells you WHAT to do with it.</div>
+
+    <div class="funnel-v">
+      <div class="funnel-step f1">🔍 AWARENESS — Reach, Impressions, Follower Growth</div>
+      <div class="funnel-arrow">▼</div>
+      <div class="funnel-step f2">💬 ENGAGEMENT — Likes, Comments, Shares, Saves, Engagement Rate</div>
+      <div class="funnel-arrow">▼</div>
+      <div class="funnel-step f3">🔗 CONSIDERATION — Link Clicks, Profile Visits, Story Swipe-Ups</div>
+      <div class="funnel-arrow">▼</div>
+      <div class="funnel-step f4">💰 CONVERSION — DM Enquiries, Sign-ups, Enrolments, Revenue</div>
+    </div>
+
+    <h3>Funnel Performance for SkillForge (Month of June 2026)</h3>
+    <table class="tbl">
+      <thead><tr><th>Funnel Stage</th><th>Metric</th><th>Value</th><th>Conversion Rate</th></tr></thead>
+      <tbody>
+        <tr><td>🔍 Awareness</td><td>Total Reach</td><td>73,630</td><td>—</td></tr>
+        <tr><td>💬 Engagement</td><td>Total Engagements</td><td>3,092</td><td>4.2% of reach</td></tr>
+        <tr><td>🔗 Consideration</td><td>Link Clicks + Profile Visits</td><td>2,581</td><td>83% of engaged</td></tr>
+        <tr><td>💰 Conversion</td><td>DM Enquiries + Sign-ups</td><td>73</td><td>2.8% of visitors</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Key Insight</h3>
+    <div class="band gr">The bottleneck is at the Conversion stage (2.8%). Engagement is strong (4.2%) but not enough people are taking the final action. Recommendation: Add stronger CTAs to top-performing Reels and LinkedIn carousels. Apply the Breadcrumb Technique — micro-commitment before the big ask.</div>
+  </div>
+
+  <!-- TAB 5: MONTHLY REPORT -->
+  <div id="tab-report" class="section">
+    <h2>Monthly Performance Report — June 2026</h2>
+    <div class="band pu">This is the actual deliverable — a professional social media analytics report for SkillForge covering the month of June 2026.</div>
+
+    <div class="report-mock">
+      <div class="report-header">
+        <div>
+          <h3>SkillForge — Social Media Performance Report</h3>
+          <p style="font-size:0.82rem;color:var(--grey);margin:4px 0 0;">Prepared by: Vansh Singhal · Digital Marketing Intern · DecodeLabs</p>
+        </div>
+        <span class="period">June 2026 · 30-Day Report</span>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-box"><div class="kv">73.6K</div><div class="kn">Total Reach</div><div class="kt" style="color:var(--green);">↑ +18%</div></div>
+        <div class="kpi-box"><div class="kv">4.2%</div><div class="kn">Avg Engagement Rate</div><div class="kt" style="color:var(--green);">↑ +0.8%</div></div>
+        <div class="kpi-box"><div class="kv">2.8%</div><div class="kn">Click-Through Rate</div><div class="kt" style="color:var(--green);">↑ +0.3%</div></div>
+        <div class="kpi-box"><div class="kv">73</div><div class="kn">DM Enquiries</div><div class="kt" style="color:var(--green);">↑ +46%</div></div>
+        <div class="kpi-box"><div class="kv">1,689</div><div class="kn">LinkedIn Profile Views</div><div class="kt" style="color:var(--green);">↑ +23%</div></div>
+        <div class="kpi-box"><div class="kv">+247</div><div class="kn">New Followers</div><div class="kt" style="color:var(--green);">↑ +14.3%</div></div>
+      </div>
+
+      <h3 style="margin-top:20px;">Top Performing Posts</h3>
+      <table class="tbl">
+        <thead><tr><th>Post</th><th>Platform</th><th>Reach</th><th>Engagement</th><th>CTR</th></tr></thead>
+        <tbody>
+          <tr><td>AI Dashboard Build (Reel)</td><td>Instagram</td><td>12,400</td><td>8.4%</td><td>3.2%</td></tr>
+          <tr><td>LMS Fatigue Carousel</td><td>LinkedIn</td><td>8,900</td><td>6.1%</td><td>4.8%</td></tr>
+          <tr><td>Python vs Java Text Post</td><td>LinkedIn</td><td>6,200</td><td>5.3%</td><td>3.9%</td></tr>
+          <tr><td>Student Spotlight Reel</td><td>Instagram</td><td>9,800</td><td>7.2%</td><td>2.1%</td></tr>
+          <tr><td>AICTE Badge Carousel</td><td>Instagram</td><td>5,400</td><td>4.9%</td><td>3.6%</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:20px;">Observations & Recommendations</h3>
+      <ul style="margin-top:8px;font-size:0.9rem;line-height:1.8;">
+        <li><strong>Reels outperform static posts</strong> by 3.2x in reach. Increase Reel frequency to 3x per week.</li>
+        <li><strong>LinkedIn carousels</strong> drive the highest CTR (4.8%) — ideal for B2B lead generation.</li>
+        <li><strong>Best posting times:</strong> LinkedIn — Tue/Wed 8–9am · Instagram — Thu/Fri 6–8pm.</li>
+        <li><strong>Hashtag strategy</strong> needs expansion — top posts used 8–12 niche hashtags vs. 3–4 generic ones.</li>
+        <li><strong>Story engagement</strong> is below benchmark — add polls and question stickers to boost interaction.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TAB 6: INSIGHTS -->
+  <div id="tab-insights" class="section">
+    <h2>Data-Driven Insights</h2>
+    <div class="band pu">Raw data is not insight. Insight is what the data means — and what you should DO because of it. Every insight must lead to a specific action.</div>
+
+    <h3>Insight 1 — Content Format Hierarchy</h3>
+    <div class="bar-chart">
+      <div class="bar-row"><span class="bar-label">Reels (BTS)</span><div class="bar-track"><div class="bar-fill" style="width:95%;background:#7C3AED;">6.2% engagement</div></div><span class="bar-val">🥇 Best</span></div>
+      <div class="bar-row"><span class="bar-label">Carousels</span><div class="bar-track"><div class="bar-fill" style="width:75%;background:#5b21b6;">4.8% engagement</div></div><span class="bar-val">🥈 Good</span></div>
+      <div class="bar-row"><span class="bar-label">Text Posts</span><div class="bar-track"><div class="bar-fill" style="width:55%;background:#4c1d95;">4.1% engagement</div></div><span class="bar-val">🥉 OK</span></div>
+      <div class="bar-row"><span class="bar-label">Static Images</span><div class="bar-track"><div class="bar-fill" style="width:30%;background:#6b7280;">2.1% engagement</div></div><span class="bar-val">⬇️ Low</span></div>
+    </div>
+
+    <h3>Insight 2 — Audience Behaviour Patterns</h3>
+    <div class="card pu">
+      <ul style="margin-top:0;">
+        <li><strong>Peak activity hours:</strong> LinkedIn 7–9am weekdays · Instagram 6–9pm weekdays & Saturday noon</li>
+        <li><strong>Save behaviour:</strong> Carousel posts on "career tips" and "Python tutorials" get 3x more saves — bookmark intent shows high value content</li>
+        <li><strong>Comment triggers:</strong> Posts ending with a question get 4x more comments than posts without a CTA</li>
+        <li><strong>Share triggers:</strong> Data-backed posts (with statistics) get 2.5x more shares than opinion posts</li>
+      </ul>
+    </div>
+
+    <h3>Insight 3 — Audience Demographics</h3>
+    <table class="tbl">
+      <thead><tr><th>Platform</th><th>Top Age Group</th><th>Top Location</th><th>Top Gender</th><th>Implication</th></tr></thead>
+      <tbody>
+        <tr><td>LinkedIn</td><td>25–34 (42%)</td><td>Delhi NCR, Mumbai</td><td>Male 68%</td><td>More career-focused content</td></tr>
+        <tr><td>Instagram</td><td>18–24 (61%)</td><td>Tier 2 cities</td><td>Male 71%</td><td>More relatable peer content</td></tr>
+        <tr><td>Facebook</td><td>25–44 (55%)</td><td>UP, Bihar, MP</td><td>Male 74%</td><td>Parent/teacher targeting</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB 7: STRATEGY -->
+  <div id="tab-strategy" class="section">
+    <h2>Strategy Recommendations</h2>
+    <div class="band gr">Data without action is just noise. These recommendations are directly derived from the June 2026 analytics data — each suggestion is backed by a specific metric.</div>
+
+    <h3>Content Strategy Adjustments</h3>
+    <table class="tbl">
+      <thead><tr><th>Recommendation</th><th>Based On</th><th>Expected Impact</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>Increase Reels to 3x/week</td><td>Reels = 6.2% engagement vs 2.1% static</td><td>+40% reach</td><td>🔴 High</td></tr>
+        <tr><td>Post LinkedIn carousels Tue/Wed 8am</td><td>Best CTR time slot data</td><td>+30% CTR</td><td>🔴 High</td></tr>
+        <tr><td>Add question CTA to every post</td><td>4x more comments on question posts</td><td>+300% comments</td><td>🟡 Medium</td></tr>
+        <tr><td>Use 8-12 niche hashtags</td><td>Top posts used specific hashtags</td><td>+25% discovery</td><td>🟡 Medium</td></tr>
+        <tr><td>Add Story polls 3x/week</td><td>Story engagement below benchmark</td><td>+50% story views</td><td>🟡 Medium</td></tr>
+        <tr><td>Share data-backed posts</td><td>2.5x more shares on statistic posts</td><td>+150% shares</td><td>🟢 Low</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Next Month Targets (July 2026)</h3>
+    <div class="metrics">
+      <div class="metric"><div class="val" style="color:var(--purple);">90K</div><div class="lbl">Total Reach target (↑22% from 73.6K)</div></div>
+      <div class="metric"><div class="val g">5%</div><div class="lbl">Engagement Rate target (↑0.8% from 4.2%)</div></div>
+      <div class="metric"><div class="val b">3.5%</div><div class="lbl">CTR target (↑0.7% from 2.8%)</div></div>
+      <div class="metric"><div class="val o">100</div><div class="lbl">DM Enquiries target (↑37% from 73)</div></div>
+      <div class="metric"><div class="val" style="color:var(--purple);">300</div><div class="lbl">New followers target (↑21% from 247)</div></div>
+      <div class="metric"><div class="val g">2K</div><div class="lbl">LinkedIn profile views target</div></div>
+    </div>
+
+    <div class="band or" style="margin-top:20px;">
+      🏆 <strong>Project 4 Gatekeeper Standard:</strong> No intern gets access to advanced campaign management until they can read data accurately and turn it into strategy. This report is your proof that you think like a data-driven marketer, not just a content creator.
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <strong>SkillForge — Social Media Analytics & Reporting</strong><br/>
+  Project 4 · Digital Marketing Industrial Training · Prepared by <strong>Vansh Singhal</strong>
+  <div class="footer-links">
+    <span>Powered by <strong>DecodeLabs</strong></span>
+    <span>Batch 2026</span>
+    <span>decodelabs.tech@gmail.com</span>
+    <span>www.decodelabs.tech</span>
+  </div>
+</footer>
+
+<script>
+function showTab(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
